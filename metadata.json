@@ -1,0 +1,6 @@
+{
+  "name": "Curso de Informática Básica - 10 Dias",
+  "description": "Sistema de 10 dias com vídeos obrigatórios sem avanço, quiz com nota de corte 8.0, identificação de alunos e painel em tempo real para o professor.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

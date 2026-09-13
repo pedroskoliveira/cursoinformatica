@@ -140,19 +140,35 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage, limits: { fileSize: 300 * 1024 * 1024 } }); // limit 300MB
 
-// Upload endpoint for admin to attach video files directly
+// Upload endpoint for admin to attach a single video file directly (with slotIndex support)
 app.post('/api/instructor/upload-video', upload.single('video'), (req: any, res) => {
   if (!req.file) return res.status(400).json({ error: 'Nenhum arquivo enviado' });
   const urlPath = `/videos/${req.file.filename}`;
+  const slotIndex = req.body.slotIndex !== undefined ? parseInt(req.body.slotIndex, 10) : undefined;
   addEvent({
     studentId: 'admin',
     studentName: 'Administrador Pedro',
     day: 0,
     type: 'VIDEO_UPLOADED',
-    message: `Vídeo ${req.file.originalname} enviado pelo Administrador.`,
+    message: `Vídeo ${req.file.originalname} enviado pelo Administrador${slotIndex !== undefined ? ` (Slot ${slotIndex + 1})` : ''}.`,
     severity: 'info'
   });
-  res.json({ success: true, url: urlPath, videoType: 'mp4' });
+  res.json({ success: true, url: urlPath, slotIndex, videoType: 'mp4' });
+});
+
+// Upload endpoint for admin to attach multiple video files (up to 5) at once
+app.post('/api/instructor/upload-videos-batch', upload.array('videos', 5), (req: any, res) => {
+  if (!req.files || req.files.length === 0) return res.status(400).json({ error: 'Nenhum arquivo enviado' });
+  const urls = (req.files as Express.Multer.File[]).map((f) => `/videos/${f.filename}`);
+  addEvent({
+    studentId: 'admin',
+    studentName: 'Administrador Pedro',
+    day: 0,
+    type: 'VIDEO_UPLOADED',
+    message: `${urls.length} vídeo(s) enviados pelo Administrador para a playlist.`,
+    severity: 'info'
+  });
+  res.json({ success: true, urls, videoType: 'mp4' });
 });
 
 // SSE Clients for real-time instructor feed

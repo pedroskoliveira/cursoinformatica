@@ -6,8 +6,16 @@ export const DEFAULT_LESSONS: DayLesson[] = [
     "title": "Dia 1: Anatomia do Computador & Hardware Essencial",
     "subtitle": "Compreenda a diferença entre Hardware e Software, CPU, Memória RAM, Armazenamento e Periféricos.",
     "durationSeconds": 120,
-    "videoUrl": "",
-    "videoType": "youtube",
+    "videoUrl": "/videos/1789256368739_aula1.mp4",
+    "videoType": "mp4",
+    "videoUrls": [
+      "/videos/1789256368739_aula1.mp4",
+      "/videos/06_aula_2.mp4",
+      "/videos/08_aula_4.mp4",
+      "/videos/10_aula_5.mp4",
+      "/videos/11_aula_6.mp4"
+    ],
+    "isReleased": true,
     "summary": [
       "Hardware é a parte física (tudo que você pode tocar), e Software são os programas e sistemas.",
       "A CPU (Processador) é o cérebro da máquina, responsável por realizar todos os cálculos.",

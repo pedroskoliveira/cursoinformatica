@@ -28,6 +28,7 @@ import {
   Lock,
   Unlock,
   Play,
+  X,
 } from 'lucide-react';
 import { Student, DayLesson, AuditEvent, InstructorStats, Question } from '../types';
 import { ALL_BADGES, getBadgeById } from '../data/badges';
@@ -111,6 +112,7 @@ export const InstructorDashboard: React.FC<InstructorDashboardProps> = ({
     try {
       const formData = new FormData();
       formData.append('video', file);
+      formData.append('slotIndex', slotIndex.toString());
       const res = await fetch('/api/instructor/upload-video', {
         method: 'POST',
         body: formData,
@@ -122,12 +124,12 @@ export const InstructorDashboard: React.FC<InstructorDashboardProps> = ({
           urls.push('');
         }
         urls[slotIndex] = data.url;
-        setLessonForm({
-          ...lessonForm,
+        setLessonForm((prev) => ({
+          ...prev,
           videoUrls: urls,
           videoUrl: urls[0] || data.url,
           videoType: 'mp4',
-        });
+        }));
         setSaveSuccessMsg(`Vídeo ${slotIndex + 1} anexado com sucesso!`);
         setTimeout(() => setSaveSuccessMsg(''), 3000);
       } else {
@@ -135,6 +137,46 @@ export const InstructorDashboard: React.FC<InstructorDashboardProps> = ({
       }
     } catch {
       alert('Erro ao enviar o arquivo de vídeo');
+    } finally {
+      setIsUploadingVideo(false);
+      setUploadingSlot(null);
+      e.target.value = '';
+    }
+  };
+
+  const handleUploadBatch = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setIsUploadingVideo(true);
+    setUploadingSlot(-1);
+    try {
+      const formData = new FormData();
+      for (let i = 0; i < Math.min(5, files.length); i++) {
+        formData.append('videos', files[i]);
+      }
+      const res = await fetch('/api/instructor/upload-videos-batch', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success && Array.isArray(data.urls)) {
+        const urls = [...(lessonForm.videoUrls || [])];
+        data.urls.forEach((u: string, idx: number) => {
+          urls[idx] = u;
+        });
+        setLessonForm((prev) => ({
+          ...prev,
+          videoUrls: urls,
+          videoUrl: urls[0] || data.urls[0],
+          videoType: 'mp4',
+        }));
+        setSaveSuccessMsg(`${data.urls.length} vídeo(s) anexados com sucesso para a playlist!`);
+        setTimeout(() => setSaveSuccessMsg(''), 3500);
+      } else {
+        alert(data.error || 'Erro ao fazer upload em lote');
+      }
+    } catch {
+      alert('Erro ao enviar os arquivos de vídeo');
     } finally {
       setIsUploadingVideo(false);
       setUploadingSlot(null);
@@ -980,8 +1022,10 @@ export const InstructorDashboard: React.FC<InstructorDashboardProps> = ({
                   onChange={(e) => {
                     const val = e.target.value;
                     const urls = [...(lessonForm.videoUrls || [])];
+                    while (urls.length < 1) urls.push('');
                     urls[0] = val;
-                    setLessonForm({ ...lessonForm, videoUrl: val, videoUrls: urls });
+                    const isYt = val.includes('youtube.com') || val.includes('youtu.be');
+                    setLessonForm({ ...lessonForm, videoUrl: val, videoUrls: urls, videoType: isYt ? 'youtube' : 'mp4' });
                   }}
                   placeholder="/videos/aula1.mp4 ou https://www.youtube.com/watch?v=..."
                   className="w-full px-3.5 py-2.5 bg-[#0d172e] border border-[#1e2d4d] rounded-lg text-xs text-slate-200 focus:outline-none focus:border-amber-500"
@@ -989,9 +1033,14 @@ export const InstructorDashboard: React.FC<InstructorDashboardProps> = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                  PLAYLIST DO DIA — ATÉ 5 VÍDEOS
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    PLAYLIST DO DIA — ATÉ 5 VÍDEOS
+                  </label>
+                  <span className="text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                    {(lessonForm.videoUrls || []).filter((u) => u && u.trim().length > 0).length} de 5 vídeos ativos
+                  </span>
+                </div>
                 <p className="text-[11px] text-slate-400 mb-2">
                   As posições vazias ficam prontas para você colar uma URL ou publicar o arquivo quando o tiver.
                 </p>
@@ -999,14 +1048,41 @@ export const InstructorDashboard: React.FC<InstructorDashboardProps> = ({
                   {[0, 1, 2, 3, 4].map((slotIdx) => {
                     const currentUrl = (lessonForm.videoUrls && lessonForm.videoUrls[slotIdx]) || '';
                     return (
-                      <input
-                        key={slotIdx}
-                        type="text"
-                        value={currentUrl}
-                        onChange={(e) => handleVideoUrlChange(slotIdx, e.target.value)}
-                        placeholder={`/videos/... ou link do vídeo ${slotIdx + 1}`}
-                        className="w-full px-3.5 py-2.5 bg-[#0d172e] border border-[#1e2d4d] rounded-lg text-xs text-slate-200 focus:outline-none focus:border-amber-500"
-                      />
+                      <div key={slotIdx} className="flex items-center space-x-2">
+                        <span className="text-[11px] font-bold text-slate-400 bg-[#101b33] border border-[#1e2d4d] w-7 h-8 rounded-lg flex items-center justify-center shrink-0">
+                          {slotIdx + 1}
+                        </span>
+                        <input
+                          type="text"
+                          value={currentUrl}
+                          onChange={(e) => handleVideoUrlChange(slotIdx, e.target.value)}
+                          placeholder={`/videos/... ou link do vídeo ${slotIdx + 1}`}
+                          className="flex-1 px-3.5 py-2 bg-[#0d172e] border border-[#1e2d4d] rounded-lg text-xs text-slate-200 focus:outline-none focus:border-amber-500"
+                        />
+                        <label
+                          title={`Anexar arquivo MP4 direto para o Vídeo ${slotIdx + 1}`}
+                          className="px-3 py-2 bg-[#18243e] hover:bg-[#223358] border border-[#273a62] rounded-lg text-slate-300 hover:text-white text-xs cursor-pointer flex items-center space-x-1 shrink-0 transition-colors"
+                        >
+                          <Upload className="w-3.5 h-3.5 text-amber-400" />
+                          <span className="hidden sm:inline text-[11px] font-medium">Anexar</span>
+                          <input
+                            type="file"
+                            accept="video/mp4,video/webm,video/quicktime"
+                            onChange={(e) => handleUploadSlot(e, slotIdx)}
+                            className="hidden"
+                          />
+                        </label>
+                        {currentUrl ? (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveVideoSlot(slotIdx)}
+                            title="Remover vídeo deste slot"
+                            className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg border border-[#1e2d4d] transition-colors cursor-pointer"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        ) : null}
+                      </div>
                     );
                   })}
                 </div>
@@ -1016,19 +1092,28 @@ export const InstructorDashboard: React.FC<InstructorDashboardProps> = ({
                 <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
                   OU ANEXAR VÍDEO (MP4)
                 </label>
-                <div className="flex items-center space-x-3">
+                <div className="flex flex-wrap items-center gap-3">
                   <input
                     type="file"
+                    multiple
                     accept="video/mp4,video/webm,video/quicktime"
-                    onChange={(e) => handleUploadSlot(e, 0)}
+                    onChange={handleUploadBatch}
                     className="text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#18243e] file:text-slate-200 hover:file:bg-[#203052] file:cursor-pointer"
                   />
                   {isUploadingVideo && (
-                    <span className="text-xs text-amber-400 animate-pulse font-medium">
-                      Enviando vídeo para o servidor...
+                    <span className="text-xs text-amber-400 animate-pulse font-medium flex items-center space-x-1.5">
+                      <Clock className="w-3.5 h-3.5 animate-spin" />
+                      <span>
+                        {uploadingSlot !== null && uploadingSlot >= 0
+                          ? `Enviando vídeo para o Slot ${uploadingSlot + 1}...`
+                          : 'Enviando vídeos para o servidor...'}
+                      </span>
                     </span>
                   )}
                 </div>
+                <p className="text-[10px] text-slate-500 mt-1">
+                  Você pode selecionar múltiplos arquivos MP4 para preencher automaticamente os 5 slots da playlist.
+                </p>
               </div>
 
               {/* Video Preview Box */}

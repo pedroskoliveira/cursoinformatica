@@ -53,7 +53,7 @@ export const StudentCourseView: React.FC<StudentCourseViewProps> = ({
   const currentLesson = lessons.find((l) => l.day === selectedDay) || lessons[0];
   const isCompleted = student.dayScores?.[selectedDay] !== undefined && student.dayScores[selectedDay] >= 8.0;
   const isLessonReleased = currentLesson.isReleased !== false || isCompleted;
-  const isVideoDone = isCompleted || student.currentStage === 'quiz' || student.currentStage === 'course_finished';
+  const isVideoDone = isCompleted || student.currentStage === 'quiz' || student.currentStage === 'course_finished' || selectedDay < (student.currentDay || 1);
   const isLastDay = selectedDay === 10;
   const hasFinishedAll = student.currentStage === 'course_finished' || (student.dayScores?.[10] !== undefined && student.dayScores[10] >= 8.0);
 

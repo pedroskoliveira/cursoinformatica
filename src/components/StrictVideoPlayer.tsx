@@ -10,6 +10,7 @@ import {
   Clock,
   Sparkles,
   Volume2,
+  BookOpen,
 } from 'lucide-react';
 import { DayLesson } from '../types';
 import { parseAndFormatVideoUrl } from '../utils/videoUtils';
@@ -300,6 +301,21 @@ export const StrictVideoPlayer: React.FC<StrictVideoPlayerProps> = ({
                 isPlayingRef.current &&
                 !hasCompletedRef.current
               ) {
+                // Check if YouTube paused because it reached or is near the end (>= 95% or within 5s)
+                let isNearEnd = false;
+                try {
+                  const cur = ytPlayerRef.current?.getCurrentTime?.() || lastKnownTimeRef.current;
+                  const dur = ytPlayerRef.current?.getDuration?.() || durationRef.current;
+                  if (dur > 0 && (cur >= dur - 5 || (dur > 10 && cur / dur >= 0.95))) {
+                    isNearEnd = true;
+                  }
+                } catch {}
+
+                if (isNearEnd) {
+                  handleFinishLesson();
+                  return;
+                }
+
                 if (Date.now() - startedAtRef.current > 4000) {
                   triggerViolation(
                     'PAUSE_ATTEMPT',
@@ -379,7 +395,7 @@ export const StrictVideoPlayer: React.FC<StrictVideoPlayerProps> = ({
             maxAllowedTimeRef.current = Math.max(maxAllowedTimeRef.current, ytCurr);
             onTimeUpdate(ytCurr, ytDuration);
 
-            if (ytCurr >= ytDuration - 1 && ytDuration > 0) {
+            if (ytDuration > 0 && (ytCurr >= ytDuration - 2 || (ytDuration > 10 && ytCurr / ytDuration >= 0.98))) {
               handleFinishLesson();
             }
             return;
@@ -517,7 +533,7 @@ export const StrictVideoPlayer: React.FC<StrictVideoPlayerProps> = ({
     maxAllowedTimeRef.current = Math.max(maxAllowedTimeRef.current, sec);
     onTimeUpdate(sec, currentDuration);
 
-    if (currentDuration > 0 && curr >= currentDuration - 0.5) {
+    if (currentDuration > 0 && (curr >= currentDuration - 1 || (currentDuration > 10 && curr / currentDuration >= 0.98))) {
       handleFinishLesson();
     }
   };
@@ -879,7 +895,7 @@ export const StrictVideoPlayer: React.FC<StrictVideoPlayerProps> = ({
         {hasCompleted && (
           <div
             id="video-completed-banner"
-            className="absolute inset-0 z-30 bg-emerald-950/85 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-300"
+            className="absolute inset-0 z-30 bg-emerald-950/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-300"
           >
             <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 mb-3 shadow-lg shadow-emerald-500/20">
               <CheckCircle2 className="w-8 h-8" />
@@ -887,12 +903,18 @@ export const StrictVideoPlayer: React.FC<StrictVideoPlayerProps> = ({
             <h3 className="text-xl font-bold text-white tracking-tight mb-1">
               Aula do Dia {lesson.day} Concluída!
             </h3>
-            <p className="text-xs text-emerald-200/80 max-w-md mb-4">
-              Você assistiu a todo o conteúdo desta videoaula. O Quiz avaliativo abaixo está liberado!
+            <p className="text-xs text-emerald-200/90 max-w-md mb-4">
+              Você assistiu a todo o conteúdo desta videoaula. O Quiz avaliativo abaixo já está liberado!
             </p>
-            <span className="text-xs font-semibold bg-emerald-500 text-slate-950 px-4 py-1.5 rounded-lg shadow-sm">
-              Exercícios e Prova Desbloqueados
-            </span>
+            <button
+              id="banner-open-quiz-btn"
+              type="button"
+              onClick={onVideoComplete}
+              className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-400 hover:to-green-400 text-slate-950 font-black text-sm rounded-xl shadow-xl shadow-emerald-500/30 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+            >
+              <BookOpen className="w-4 h-4" />
+              <span>Ir para o Quiz Avaliativo Agora ➔</span>
+            </button>
           </div>
         )}
       </div>
@@ -907,10 +929,30 @@ export const StrictVideoPlayer: React.FC<StrictVideoPlayerProps> = ({
             <span className="text-blue-400 font-mono font-bold">
               {progressPercent}%
             </span>
+            {(hasCompleted || isUnlockedForQuiz || currentTime >= duration - 5) && (
+              <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                <span>Vídeo Concluído</span>
+              </span>
+            )}
           </div>
-          <div className="flex items-center space-x-1 text-[11px] text-amber-400">
-            <Lock className="w-3 h-3" />
-            <span>Barra de avanço bloqueada (assistir integralmente)</span>
+          <div className="flex items-center space-x-2">
+            {(hasCompleted || isUnlockedForQuiz || currentTime >= duration - 5) ? (
+              <button
+                type="button"
+                id="unlock-quiz-direct-btn"
+                onClick={onVideoComplete}
+                className="flex items-center space-x-1.5 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-all cursor-pointer shadow-sm hover:scale-105 active:scale-95"
+              >
+                <BookOpen className="w-3 h-3" />
+                <span>Liberar Quiz Agora</span>
+              </button>
+            ) : (
+              <div className="flex items-center space-x-1 text-[11px] text-amber-400">
+                <Lock className="w-3 h-3" />
+                <span>Barra de avanço bloqueada (assistir integralmente)</span>
+              </div>
+            )}
           </div>
         </div>
 

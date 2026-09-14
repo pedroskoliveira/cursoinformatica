@@ -90,7 +90,18 @@ export default function App() {
     fetch('/api/instructor/roster')
       .then((res) => res.json())
       .then((data) => {
-        if (data.students) setStudentsList(data.students);
+        if (data.students) {
+          setStudentsList(data.students);
+          // Sync student stage if instructor unlocked quiz on server
+          if (studentRef.current) {
+            const fresh = data.students.find((s: Student) => s.id === studentRef.current?.id);
+            if (fresh && fresh.currentStage === 'quiz' && studentRef.current.currentStage === 'video') {
+              const updated = { ...studentRef.current, currentStage: 'quiz' as const };
+              setStudent(updated);
+              localStorage.setItem('inf_basica_student', JSON.stringify(updated));
+            }
+          }
+        }
         if (data.stats) {
           setStats(data.stats);
           setOnlineCount(data.stats.onlineStudents);
@@ -128,10 +139,44 @@ export default function App() {
       eventSource.addEventListener('roster_update', (e) => {
         try {
           const data = JSON.parse(e.data);
-          if (data.students) setStudentsList(data.students);
+          if (data.students) {
+            setStudentsList(data.students);
+            if (studentRef.current) {
+              const fresh = data.students.find((s: Student) => s.id === studentRef.current?.id);
+              if (fresh && fresh.currentStage === 'quiz' && studentRef.current.currentStage === 'video') {
+                const updated = { ...studentRef.current, currentStage: 'quiz' as const };
+                setStudent(updated);
+                localStorage.setItem('inf_basica_student', JSON.stringify(updated));
+              }
+            }
+          }
           if (data.stats) {
             setStats(data.stats);
             setOnlineCount(data.stats.onlineStudents);
+          }
+        } catch {}
+      });
+
+      eventSource.addEventListener('student_stage_updated', (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          if (studentRef.current && data.studentId === studentRef.current.id) {
+            if (data.currentStage === 'quiz') {
+              const updated = { ...studentRef.current, currentStage: 'quiz' as const };
+              setStudent(updated);
+              localStorage.setItem('inf_basica_student', JSON.stringify(updated));
+            }
+          }
+        } catch {}
+      });
+
+      eventSource.addEventListener('all_stage_updated', (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          if (studentRef.current && data.currentStage === 'quiz') {
+            const updated = { ...studentRef.current, currentStage: 'quiz' as const };
+            setStudent(updated);
+            localStorage.setItem('inf_basica_student', JSON.stringify(updated));
           }
         } catch {}
       });
@@ -169,7 +214,18 @@ export default function App() {
           videoTime: studentRef.current.videoCurrentTime,
           videoDuration: studentRef.current.videoDuration,
         }),
-      }).catch(() => {});
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.serverStage && studentRef.current) {
+            if (data.serverStage === 'quiz' && studentRef.current.currentStage === 'video') {
+              const updated = { ...studentRef.current, currentStage: 'quiz' as const };
+              setStudent(updated);
+              localStorage.setItem('inf_basica_student', JSON.stringify(updated));
+            }
+          }
+        })
+        .catch(() => {});
     };
 
     ping();
@@ -211,6 +267,16 @@ export default function App() {
   // Video Complete Handler (Unlocks Quiz)
   const handleVideoComplete = async (day: number) => {
     if (!student) return;
+
+    // 1. Optimistic instant unlock locally: the student is NEVER blocked
+    const updated = {
+      ...student,
+      currentStage: 'quiz' as const,
+    };
+    setStudent(updated);
+    localStorage.setItem('inf_basica_student', JSON.stringify(updated));
+
+    // 2. Notify backend server
     try {
       const res = await fetch('/api/students/video-finished', {
         method: 'POST',
@@ -219,12 +285,6 @@ export default function App() {
       });
       const data = await res.json();
       if (data.success) {
-        const updated = {
-          ...student,
-          currentStage: 'quiz' as const,
-        };
-        setStudent(updated);
-        localStorage.setItem('inf_basica_student', JSON.stringify(updated));
         fetchInstructorData();
       }
     } catch (err) {

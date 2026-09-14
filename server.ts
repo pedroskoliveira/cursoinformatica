@@ -498,15 +498,29 @@ app.post('/api/students/heartbeat', (req, res) => {
   const s = db.students[studentId];
   s.lastActive = new Date().toISOString();
   s.isOnline = true;
-  if (currentDay !== undefined) s.currentDay = currentDay;
-  if (currentStage !== undefined) s.currentStage = currentStage;
+  if (currentDay !== undefined && currentDay >= s.currentDay) s.currentDay = currentDay;
+
+  // Never downgrade from 'quiz', 'passed_quiz', or 'course_finished' back to 'video' via background heartbeat
+  if (currentStage !== undefined) {
+    if ((s.currentStage === 'quiz' || s.currentStage === 'course_finished') && currentStage === 'video') {
+      // Keep server's advanced stage (e.g. instructor unlocked quiz)
+    } else {
+      s.currentStage = currentStage;
+    }
+  }
+
   if (videoTime !== undefined) s.videoCurrentTime = Math.round(videoTime);
   if (videoDuration !== undefined) s.videoDuration = Math.round(videoDuration);
 
-  // Periodic save (or when stage changes)
+  // Periodic save
   saveDb();
 
-  res.json({ success: true, serverTime: Date.now() });
+  res.json({
+    success: true,
+    serverStage: s.currentStage,
+    currentDay: s.currentDay,
+    serverTime: Date.now()
+  });
 });
 
 // 6. Infraction / Reset Event: When user attempts forward seek, pause, leaves video tab, etc.
@@ -585,7 +599,65 @@ app.post('/api/students/video-finished', (req, res) => {
     severity: 'info'
   });
 
+  broadcastSSE('roster_update', getRosterData());
+  broadcastSSE('student_stage_updated', { studentId: s.id, currentStage: 'quiz', day: s.currentDay });
+
   res.json({ success: true, currentStage: 'quiz' });
+});
+
+// 7.1. Unlock Quiz manually for a student without wiping scores/history
+app.post('/api/students/unlock-quiz', (req, res) => {
+  const { studentId } = req.body;
+  if (!studentId || !db.students[studentId]) {
+    return res.status(404).json({ error: 'Aluno não encontrado' });
+  }
+
+  const s = db.students[studentId];
+  s.currentStage = 'quiz';
+  s.lastActive = new Date().toISOString();
+  saveDb();
+
+  addEvent({
+    studentId: s.id,
+    studentName: s.name,
+    day: s.currentDay,
+    type: 'DAY_UNLOCKED',
+    message: `Quiz do Dia ${s.currentDay} liberado com sucesso para ${s.name} (dados mantidos).`,
+    severity: 'success'
+  });
+
+  broadcastSSE('roster_update', getRosterData());
+  broadcastSSE('student_stage_updated', { studentId: s.id, currentStage: 'quiz', day: s.currentDay });
+
+  res.json({ success: true, student: s });
+});
+
+// 7.2. Unlock Quiz for ALL students currently at 'video' stage
+app.post('/api/students/unlock-quiz-all', (req, res) => {
+  let count = 0;
+  Object.values(db.students).forEach((s) => {
+    if (s.currentStage === 'video') {
+      s.currentStage = 'quiz';
+      s.lastActive = new Date().toISOString();
+      count++;
+    }
+  });
+
+  if (count > 0) {
+    saveDb();
+    addEvent({
+      studentId: 'admin',
+      studentName: 'Instrutor',
+      day: 0,
+      type: 'DAY_UNLOCKED',
+      message: `Instrutor liberou o Quiz para ${count} aluno(s) simultaneamente.`,
+      severity: 'success'
+    });
+    broadcastSSE('roster_update', getRosterData());
+    broadcastSSE('all_stage_updated', { currentStage: 'quiz' });
+  }
+
+  res.json({ success: true, count });
 });
 
 // 8. Quiz Submission: Must score >= 8.0 to pass! If < 8.0, RESTART DAY FROM BEGINNING!

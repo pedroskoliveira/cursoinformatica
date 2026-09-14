@@ -232,9 +232,9 @@ export default function App() {
     }
   };
 
-  // Violation Handler: User attempted forward seek, pause, left video tab, etc.
+  // Violation Handler: User attempted forward seek, pause, left video tab, attention timeout, etc.
   const handleViolation = async (
-    type: 'LEFT_VIDEO' | 'SEEK_ATTEMPT' | 'PAUSE_ATTEMPT',
+    type: 'LEFT_VIDEO' | 'SEEK_ATTEMPT' | 'PAUSE_ATTEMPT' | 'ATTENTION_TIMEOUT',
     detail: string
   ) => {
     if (!student) return;

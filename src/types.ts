@@ -21,7 +21,7 @@ export interface DayLesson {
 
 export interface StudentInfraction {
   id: string;
-  type: 'LEFT_VIDEO' | 'SEEK_ATTEMPT' | 'PAUSE_ATTEMPT' | 'TAB_SWITCH' | 'BLUR_WINDOW';
+  type: 'LEFT_VIDEO' | 'SEEK_ATTEMPT' | 'PAUSE_ATTEMPT' | 'TAB_SWITCH' | 'BLUR_WINDOW' | 'ATTENTION_TIMEOUT';
   day: number;
   timestamp: string;
   detail: string;
@@ -59,9 +59,11 @@ export interface AuditEvent {
     | 'LEFT_VIDEO'
     | 'SEEK_ATTEMPT'
     | 'PAUSE_ATTEMPT'
+    | 'ATTENTION_TIMEOUT'
     | 'QUIZ_SUBMITTED'
     | 'QUIZ_PASSED'
     | 'QUIZ_FAILED_RESET'
+    | 'QUIZ_ATTEMPTS_EXHAUSTED'
     | 'DAY_UNLOCKED'
     | 'COURSE_COMPLETED'
     | 'INSTRUCTOR_RESET'

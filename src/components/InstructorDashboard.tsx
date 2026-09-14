@@ -124,14 +124,25 @@ export const InstructorDashboard: React.FC<InstructorDashboardProps> = ({
           urls.push('');
         }
         urls[slotIndex] = data.url;
-        setLessonForm((prev) => ({
-          ...prev,
+        const activeUrls = urls.map((u) => u.trim()).filter((u) => u.length > 0);
+        const updatedForm: Partial<DayLesson> = {
+          ...lessonForm,
           videoUrls: urls,
           videoUrl: urls[0] || data.url,
           videoType: 'mp4',
-        }));
-        setSaveSuccessMsg(`Vídeo ${slotIndex + 1} anexado com sucesso!`);
-        setTimeout(() => setSaveSuccessMsg(''), 3000);
+        };
+        setLessonForm(updatedForm);
+
+        // Auto-save immediately to database so video metadata is never lost
+        await onUpdateLesson(editingDay, {
+          ...updatedForm,
+          videoUrls: activeUrls,
+          videoUrl: activeUrls[0] || data.url,
+          isReleased: lessonForm.isReleased ?? (editingDay === 1),
+        });
+
+        setSaveSuccessMsg(`Vídeo ${slotIndex + 1} anexado e salvo automaticamente com sucesso!`);
+        setTimeout(() => setSaveSuccessMsg(''), 3500);
       } else {
         alert(data.error || 'Erro ao fazer upload do vídeo');
       }
@@ -164,14 +175,25 @@ export const InstructorDashboard: React.FC<InstructorDashboardProps> = ({
         data.urls.forEach((u: string, idx: number) => {
           urls[idx] = u;
         });
-        setLessonForm((prev) => ({
-          ...prev,
+        const activeUrls = urls.map((u) => u.trim()).filter((u) => u.length > 0);
+        const updatedForm: Partial<DayLesson> = {
+          ...lessonForm,
           videoUrls: urls,
           videoUrl: urls[0] || data.urls[0],
           videoType: 'mp4',
-        }));
-        setSaveSuccessMsg(`${data.urls.length} vídeo(s) anexados com sucesso para a playlist!`);
-        setTimeout(() => setSaveSuccessMsg(''), 3500);
+        };
+        setLessonForm(updatedForm);
+
+        // Auto-save immediately to database so playlist metadata is never lost
+        await onUpdateLesson(editingDay, {
+          ...updatedForm,
+          videoUrls: activeUrls,
+          videoUrl: activeUrls[0] || data.urls[0],
+          isReleased: lessonForm.isReleased ?? (editingDay === 1),
+        });
+
+        setSaveSuccessMsg(`${data.urls.length} vídeo(s) anexados e salvos automaticamente na playlist!`);
+        setTimeout(() => setSaveSuccessMsg(''), 4000);
       } else {
         alert(data.error || 'Erro ao fazer upload em lote');
       }

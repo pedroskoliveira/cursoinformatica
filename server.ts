@@ -542,6 +542,8 @@ app.post('/api/students/infraction', (req, res) => {
     humanMessage = `Aluno ${student.name} TENTOU ADIANTAR O VÍDEO no Dia ${day || student.currentDay}! Bloqueado e reiniciado para 00:00.`;
   } else if (type === 'PAUSE_ATTEMPT') {
     humanMessage = `Aluno ${student.name} TENTOU PAUSAR O VÍDEO no Dia ${day || student.currentDay}! Não permitido, vídeo reiniciado.`;
+  } else if (type === 'ATTENTION_TIMEOUT') {
+    humanMessage = `Aluno ${student.name} NÃO CONFIRMOU PRESENÇA A TEMPO (teste de atenção) no Dia ${day || student.currentDay}! O vídeo foi reiniciado para 00:00.`;
   } else {
     humanMessage = `Violação detectada para ${student.name}: ${detail}. Vídeo reiniciado.`;
   }
@@ -550,7 +552,7 @@ app.post('/api/students/infraction', (req, res) => {
     studentId: student.id,
     studentName: student.name,
     day: day || student.currentDay,
-    type: type as any || 'LEFT_VIDEO',
+    type: (type as any) || 'LEFT_VIDEO',
     message: humanMessage,
     severity: 'danger'
   });
@@ -558,7 +560,7 @@ app.post('/api/students/infraction', (req, res) => {
   res.json({
     success: true,
     resetToStart: true,
-    message: 'Vídeo reiniciado devido à saída da tela ou tentativa de avanço/pausa.'
+    message: 'Vídeo reiniciado devido à saída da tela, ausência na confirmação de presença ou tentativa de avanço/pausa.'
   });
 });
 
@@ -618,12 +620,15 @@ app.post('/api/students/quiz-submit', (req, res) => {
   });
 
   const score = Number(((correctCount / totalQuestions) * 10).toFixed(1));
-  const attempts = (student.dayAttempts[day] || 0) + 1;
-  student.dayAttempts[day] = attempts;
+  const currentAttempts = (student.dayAttempts[day] || 0) + 1;
+  student.dayAttempts[day] = currentAttempts;
   student.dayScores[day] = score;
 
+  const MAX_ATTEMPTS = 3;
   const PASSING_SCORE = 8.0;
   const passed = score >= PASSING_SCORE;
+  const attemptsRemaining = Math.max(0, MAX_ATTEMPTS - currentAttempts);
+  const attemptsExhausted = !passed && currentAttempts >= MAX_ATTEMPTS;
 
   if (passed) {
     // Approved for this day!
@@ -635,7 +640,7 @@ app.post('/api/students/quiz-submit', (req, res) => {
         studentName: student.name,
         day: 10,
         type: 'COURSE_COMPLETED',
-        message: `🎓 Aluno ${student.name} CONCLUIU OS 10 DIAS DO CURSO! Nota final do Dia 10: ${score}/10!`,
+        message: `🎓 Aluno ${student.name} CONCLUIU OS 10 DIAS DO CURSO! Nota final do Dia 10: ${score}/10 (Tentativa ${currentAttempts}/${MAX_ATTEMPTS})!`,
         severity: 'success'
       });
     } else {
@@ -648,23 +653,34 @@ app.post('/api/students/quiz-submit', (req, res) => {
         studentName: student.name,
         day,
         type: 'QUIZ_PASSED',
-        message: `✅ Aluno ${student.name} APROVADO no Dia ${day} com nota ${score}/10! Liberado o Dia ${day + 1}.`,
+        message: `✅ Aluno ${student.name} APROVADO no Dia ${day} com nota ${score}/10 na tentativa ${currentAttempts}/${MAX_ATTEMPTS}! Liberado o Dia ${day + 1}.`,
         severity: 'success'
       });
     }
   } else {
-    // FAILED (< 8.0) -> Strict enforcement: RESET ENTIRE DAY TO VIDEO 00:00!
+    // FAILED (< 8.0)
     student.currentStage = 'video';
     student.videoCurrentTime = 0;
-    
-    addEvent({
-      studentId: student.id,
-      studentName: student.name,
-      day,
-      type: 'QUIZ_FAILED_RESET',
-      message: `❌ Aluno ${student.name} REPROVADO no Quiz do Dia ${day} com nota ${score}/10 (Mínimo: 8.0). Conforme regra, voltou para o início do vídeo!`,
-      severity: 'danger'
-    });
+
+    if (attemptsExhausted) {
+      addEvent({
+        studentId: student.id,
+        studentName: student.name,
+        day,
+        type: 'QUIZ_ATTEMPTS_EXHAUSTED',
+        message: `⚠️ Aluno ${student.name} ESGOTOU AS ${MAX_ATTEMPTS} TENTATIVAS do Quiz do Dia ${day} (Nota da 3ª tentativa: ${score}/10). Requer orientação do professor para liberação de novas tentativas ou reset.`,
+        severity: 'danger'
+      });
+    } else {
+      addEvent({
+        studentId: student.id,
+        studentName: student.name,
+        day,
+        type: 'QUIZ_FAILED_RESET',
+        message: `❌ Aluno ${student.name} REPROVADO no Quiz do Dia ${day} com nota ${score}/10 (Mínimo: 8.0). Tentativa ${currentAttempts}/${MAX_ATTEMPTS} utilizada. Restam ${attemptsRemaining} tentativa(s). Vídeo reiniciado!`,
+        severity: 'danger'
+      });
+    }
   }
 
   // Evaluate badges on student after quiz outcome
@@ -684,6 +700,15 @@ app.post('/api/students/quiz-submit', (req, res) => {
 
   saveDb();
 
+  let resultMessage = '';
+  if (passed) {
+    resultMessage = `Parabéns! Você tirou nota ${score}/10 na tentativa ${currentAttempts}/${MAX_ATTEMPTS} e foi aprovado no Dia ${day}!`;
+  } else if (attemptsExhausted) {
+    resultMessage = `Nota ${score}/10. Você utilizou todas as ${MAX_ATTEMPTS} tentativas do Dia ${day}. Procure o professor em sala para reiniciar suas tentativas ou orientar seus estudos.`;
+  } else {
+    resultMessage = `Nota ${score}/10 (Mínimo exigido: ${PASSING_SCORE}). Você utilizou a tentativa ${currentAttempts} de ${MAX_ATTEMPTS}. Restam ${attemptsRemaining} tentativa(s). Reassista à videoaula completa para liberar a próxima tentativa.`;
+  }
+
   res.json({
     success: true,
     passed,
@@ -693,10 +718,12 @@ app.post('/api/students/quiz-submit', (req, res) => {
     totalQuestions,
     questionResults,
     student,
+    attempts: currentAttempts,
+    maxAttempts: MAX_ATTEMPTS,
+    attemptsRemaining,
+    attemptsExhausted,
     newlyUnlockedBadges: badgeEval.newBadges,
-    message: passed
-      ? `Parabéns! Você tirou nota ${score}/10 e foi aprovado no Dia ${day}!`
-      : `Nota insuficiente: ${score}/10. O mínimo exigido é ${PASSING_SCORE}. Conforme as regras, você precisa reassistir a aula desde o início (00:00) e tentar novamente.`
+    message: resultMessage
   });
 });
 
@@ -800,6 +827,32 @@ app.post('/api/instructor/advance-student', (req, res) => {
   saveDb();
 
   res.json({ success: true, student: s, newlyUnlockedBadges: badgeEval.newBadges });
+});
+
+// 13b. Instructor Reset Quiz Attempts for Student
+app.post('/api/instructor/reset-attempts', (req, res) => {
+  const { studentId, day } = req.body;
+  if (!studentId || !db.students[studentId]) {
+    return res.status(404).json({ error: 'Aluno não encontrado' });
+  }
+
+  const s = db.students[studentId];
+  const targetDay = day || s.currentDay;
+  if (s.dayAttempts) {
+    s.dayAttempts[targetDay] = 0;
+  }
+  saveDb();
+
+  addEvent({
+    studentId: s.id,
+    studentName: s.name,
+    day: targetDay,
+    type: 'INSTRUCTOR_RESET',
+    message: `O Professor resetou as tentativas de Quiz do aluno ${s.name} no Dia ${targetDay} (3 novas tentativas liberadas).`,
+    severity: 'info'
+  });
+
+  res.json({ success: true, student: s });
 });
 
 // 14. Instructor Delete Student

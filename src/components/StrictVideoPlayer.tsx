@@ -17,7 +17,7 @@ import { parseAndFormatVideoUrl } from '../utils/videoUtils';
 interface StrictVideoPlayerProps {
   lesson: DayLesson;
   onVideoComplete: () => void;
-  onViolation: (type: 'LEFT_VIDEO' | 'SEEK_ATTEMPT' | 'PAUSE_ATTEMPT', detail: string) => void;
+  onViolation: (type: 'LEFT_VIDEO' | 'SEEK_ATTEMPT' | 'PAUSE_ATTEMPT' | 'ATTENTION_TIMEOUT', detail: string) => void;
   onTimeUpdate: (currentTime: number, duration: number) => void;
   isUnlockedForQuiz: boolean;
 }
@@ -59,6 +59,14 @@ export const StrictVideoPlayer: React.FC<StrictVideoPlayerProps> = ({
     message: string;
   } | null>(null);
 
+  // Presence / Attention Verification (Disparos para confirmar presença)
+  const [attentionPrompt, setAttentionPrompt] = useState<{
+    show: boolean;
+    timeLeft: number;
+  } | null>(null);
+  const attentionTimerRef = useRef<any>(null);
+  const attentionCountdownRef = useRef<any>(null);
+
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [playerMode, setPlayerMode] = useState<'video' | 'interactive'>(() =>
     isVideoAvailable ? 'video' : 'interactive'
@@ -97,19 +105,26 @@ export const StrictVideoPlayer: React.FC<StrictVideoPlayerProps> = ({
     }
 
     if (timerRef.current) clearInterval(timerRef.current);
+    if (attentionTimerRef.current) clearTimeout(attentionTimerRef.current);
+    if (attentionCountdownRef.current) clearInterval(attentionCountdownRef.current);
+    setAttentionPrompt(null);
   }, [lesson.day, isUnlockedForQuiz, lesson.videoUrl, lesson.videoUrls, isVideoAvailable]);
 
   // Handle violation: resets everything to 00:00 and alerts the student
   const triggerViolation = useCallback(
-    (type: 'LEFT_VIDEO' | 'SEEK_ATTEMPT' | 'PAUSE_ATTEMPT', detail: string) => {
-      // Grace period: ignore during initial 4 seconds of playback start
-      if (Date.now() - startedAtRef.current < 4000) {
+    (type: 'LEFT_VIDEO' | 'SEEK_ATTEMPT' | 'PAUSE_ATTEMPT' | 'ATTENTION_TIMEOUT', detail: string) => {
+      // Grace period: ignore during initial 4 seconds of playback start (except for attention timeout which only triggers after playback)
+      if (type !== 'ATTENTION_TIMEOUT' && Date.now() - startedAtRef.current < 4000) {
         return;
       }
       // If already completed or not playing, do not penalize
       if (hasCompletedRef.current || !isPlayingRef.current) {
         return;
       }
+
+      if (attentionTimerRef.current) clearTimeout(attentionTimerRef.current);
+      if (attentionCountdownRef.current) clearInterval(attentionCountdownRef.current);
+      setAttentionPrompt(null);
 
       setIsPlaying(false);
       setCurrentTime(0);
@@ -188,10 +203,51 @@ export const StrictVideoPlayer: React.FC<StrictVideoPlayerProps> = ({
     };
   }, [triggerViolation]);
 
-  // Finish Lesson or Advance Playlist Handler
+  // Presence / Attention Scheduling
+  const scheduleNextAttentionCheck = useCallback(() => {
+    if (attentionTimerRef.current) clearTimeout(attentionTimerRef.current);
+    if (attentionCountdownRef.current) clearInterval(attentionCountdownRef.current);
+
+    // Random interval between 60 and 100 seconds of active playback
+    const delay = Math.floor(Math.random() * (100 - 60 + 1) + 60) * 1000;
+
+    attentionTimerRef.current = setTimeout(() => {
+      if (!isPlayingRef.current || hasCompletedRef.current) return;
+
+      // Open attention confirmation prompt with 30-second countdown
+      setAttentionPrompt({ show: true, timeLeft: 30 });
+
+      let remaining = 30;
+      attentionCountdownRef.current = setInterval(() => {
+        remaining -= 1;
+        if (remaining <= 0) {
+          clearInterval(attentionCountdownRef.current);
+          setAttentionPrompt(null);
+          triggerViolation(
+            'ATTENTION_TIMEOUT',
+            'Tempo limite esgotado: você não confirmou presença na videoaula dentro dos 30 segundos.'
+          );
+        } else {
+          setAttentionPrompt((prev) => (prev ? { ...prev, timeLeft: remaining } : null));
+        }
+      }, 1000);
+    }, delay);
+  }, [triggerViolation]);
+
+  const handleConfirmAttention = useCallback(() => {
+    if (attentionCountdownRef.current) clearInterval(attentionCountdownRef.current);
+    setAttentionPrompt(null);
+    scheduleNextAttentionCheck();
+  }, [scheduleNextAttentionCheck]);
+
+  // Finish Lesson or Advance Playlist Handler (Execução Direta em Sequência Automática)
   const handleFinishLesson = useCallback(() => {
+    if (attentionTimerRef.current) clearTimeout(attentionTimerRef.current);
+    if (attentionCountdownRef.current) clearInterval(attentionCountdownRef.current);
+    setAttentionPrompt(null);
+
     if (currentVideoIndex < playlist.length - 1) {
-      // Advance to next video in playlist
+      // Advance to next video in playlist automatically without pause
       const nextIdx = currentVideoIndex + 1;
       setCurrentVideoIndex(nextIdx);
       setCurrentTime(0);
@@ -199,6 +255,9 @@ export const StrictVideoPlayer: React.FC<StrictVideoPlayerProps> = ({
       lastKnownTimeRef.current = 0;
       startedAtRef.current = Date.now();
       setIsPlaying(true);
+      setTimeout(() => {
+        scheduleNextAttentionCheck();
+      }, 2000);
     } else {
       // Completed all videos for this day!
       setIsPlaying(false);
@@ -208,7 +267,7 @@ export const StrictVideoPlayer: React.FC<StrictVideoPlayerProps> = ({
       onTimeUpdate(finalDuration, finalDuration);
       onVideoComplete();
     }
-  }, [currentVideoIndex, playlist.length, onTimeUpdate, onVideoComplete]);
+  }, [currentVideoIndex, playlist.length, onTimeUpdate, onVideoComplete, scheduleNextAttentionCheck]);
 
   // YouTube API initialization & duration auto-detection
   useEffect(() => {
@@ -381,6 +440,8 @@ export const StrictVideoPlayer: React.FC<StrictVideoPlayerProps> = ({
     setCurrentTime(0);
     setIsPlaying(true);
 
+    scheduleNextAttentionCheck();
+
     if (videoRef.current) {
       videoRef.current.currentTime = 0;
       videoRef.current.play().catch(() => {});
@@ -395,6 +456,22 @@ export const StrictVideoPlayer: React.FC<StrictVideoPlayerProps> = ({
       }
     }
   };
+
+  // Auto-play next video in sequence when currentVideoIndex changes
+  useEffect(() => {
+    if (isPlaying && !hasCompleted) {
+      if (videoRef.current) {
+        videoRef.current.currentTime = 0;
+        videoRef.current.play().catch(() => {});
+      }
+      if (ytPlayerRef.current && typeof ytPlayerRef.current.playVideo === 'function') {
+        try {
+          ytPlayerRef.current.seekTo(0, true);
+          ytPlayerRef.current.playVideo();
+        } catch {}
+      }
+    }
+  }, [currentVideoIndex]);
 
   // Prevent user pausing directly
   const handleUserAttemptPause = () => {
@@ -503,6 +580,42 @@ export const StrictVideoPlayer: React.FC<StrictVideoPlayerProps> = ({
           >
             <RotateCcw className="w-4 h-4" />
             <span>Entendi, Recomeçar Vídeo (00:00)</span>
+          </button>
+        </div>
+      )}
+
+      {/* Attention / Presence Verification Overlay (Disparo de Presença) */}
+      {attentionPrompt && attentionPrompt.show && (
+        <div
+          id="video-attention-check-modal"
+          className="absolute inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in duration-200"
+        >
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/20 border-2 border-amber-500/60 flex items-center justify-center text-amber-400 mb-4 animate-bounce">
+            <Eye className="w-8 h-8" />
+          </div>
+          <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/30 mb-3">
+            Verificação de Atenção Obrigatória
+          </div>
+          <h3 className="text-xl font-bold text-white mb-2">
+            Você ainda está assistindo à aula?
+          </h3>
+          <p className="text-sm text-slate-300 max-w-md mb-5 leading-relaxed">
+            Para garantir que você está acompanhando ativamente o conteúdo e não apenas deixando o vídeo rodar, confirme sua presença.
+          </p>
+
+          <div className="flex items-center space-x-2 text-amber-400 font-mono text-base font-bold mb-6 bg-slate-900/90 px-5 py-2.5 rounded-xl border border-amber-500/40 shadow-inner">
+            <Clock className="w-5 h-5 animate-spin" />
+            <span>Tempo restante: {attentionPrompt.timeLeft} segundos</span>
+          </div>
+
+          <button
+            id="confirm-attention-btn"
+            type="button"
+            onClick={handleConfirmAttention}
+            className="flex items-center space-x-2 px-8 py-3.5 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-white rounded-xl font-bold text-sm shadow-xl shadow-emerald-600/30 hover:shadow-emerald-600/50 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+          >
+            <CheckCircle2 className="w-5 h-5" />
+            <span>Estou assistindo! Continuar Aula</span>
           </button>
         </div>
       )}
@@ -675,6 +788,7 @@ export const StrictVideoPlayer: React.FC<StrictVideoPlayerProps> = ({
                 id={`native-video-day-${lesson.day}-${currentVideoIndex}`}
                 src={videoInfo.embedUrl}
                 playsInline
+                autoPlay={isPlaying}
                 preload="metadata"
                 controls={false}
                 disablePictureInPicture

@@ -24,67 +24,607 @@ export const DEFAULT_LESSONS: DayLesson[] = [
       "Periféricos de entrada enviam dados (Teclado, Mouse), de saída exibem dados (Monitor, Caixa de Som)."
     ],
     "questions": [
-      {
-        "id": "d1_q1",
-        "question": "Qual é o componente considerado o \"cérebro\" do computador, que executa instruções e cálculos?",
-        "options": [
-          "Memória RAM",
-          "Processador (CPU)",
-          "Disco Rígido (HD/SSD)",
-          "Fonte de Alimentação"
-        ],
-        "correctIndex": 1,
-        "explanation": "A CPU (Unidade Central de Processamento) gerencia e executa todas as instruções dos programas."
-      },
-      {
-        "id": "d1_q2",
-        "question": "O que acontece com as informações armazenadas na Memória RAM quando o computador é desligado?",
-        "options": [
-          "Ficam salvas permanentemente no disco",
-          "São enviadas automaticamente para a nuvem",
-          "São totalmente apagadas por ser uma memória volátil",
-          "Ficam gravadas na placa de vídeo"
-        ],
-        "correctIndex": 2,
-        "explanation": "A memória RAM é volátil; ela requer energia elétrica contínua para reter os dados abertos."
-      },
-      {
-        "id": "d1_q3",
-        "question": "Assinale a alternativa que contém apenas periféricos de ENTRADA de dados:",
-        "options": [
-          "Monitor e Impressora",
-          "Teclado e Mouse",
-          "Caixa de som e Projetor",
-          "Monitor e Fone de ouvido"
-        ],
-        "correctIndex": 1,
-        "explanation": "Teclado e mouse enviam comandos do usuário para dentro do computador."
-      },
-      {
-        "id": "d1_q4",
-        "question": "Qual a principal vantagem de um SSD em comparação ao antigo HD mecânico?",
-        "options": [
-          "O SSD é muito mais rápido no carregamento do sistema e programas",
-          "O SSD consome muito mais energia elétrica",
-          "O SSD possui partes mecânicas que giram mais rápido",
-          "O SSD não permite salvar fotos ou vídeos"
-        ],
-        "correctIndex": 0,
-        "explanation": "Por usar memória flash sem peças mecânicas, o SSD é até 10x mais veloz que um HD tradicional."
-      },
-      {
-        "id": "d1_q5",
-        "question": "Qual é a definição correta de Software?",
-        "options": [
-          "Os cabos e conectores de energia do gabinete",
-          "O conjunto de programas, aplicativos e instruções que dizem ao hardware o que fazer",
-          "Apenas a tela de vidro do monitor",
-          "O botão de ligar e desligar"
-        ],
-        "correctIndex": 1,
-        "explanation": "Software são as instruções lógicas e aplicativos executados no hardware físico."
-      }
-    ]
+        {
+                "id": "d1_p1_q1",
+                "question": "O que representam os ícones na área de trabalho do Windows?",
+                "options": [
+                        "Apenas imagens decorativas sem função prática.",
+                        "Figuras que representam pastas, arquivos ou programas.",
+                        "Configurações exclusivas de hardware do computador.",
+                        "Arquivos corrompidos que devem ser excluídos."
+                ],
+                "correctIndex": 1,
+                "explanation": "Ícones são representações gráficas que facilitam o acesso rápido a pastas, arquivos e programas instalados."
+        },
+        {
+                "id": "d1_p1_q2",
+                "question": "Qual é a principal função de um atalho no Windows?",
+                "options": [
+                        "Apagar permanentemente um programa do disco rígido.",
+                        "Reduzir a resolução da tela automaticamente.",
+                        "Direcionar para um programa ou pasta rapidamente.",
+                        "Compactar arquivos pesados em formato compactado."
+                ],
+                "correctIndex": 2,
+                "explanation": "Atalhos servem como pontes para abrir arquivos, pastas ou programas sem precisar navegar até seu local original de instalação."
+        },
+        {
+                "id": "d1_p1_q3",
+                "question": "Como é possível identificar visualmente se um arquivo é um aplicativo (programa)?",
+                "options": [
+                        "Porque ele obrigatoriamente tem a extensão .txt.",
+                        "Porque ele sempre possui o tamanho exato de 1 MB.",
+                        "Pelo fato de não possuir ícone gráfico associado.",
+                        "Pelo desenho diferenciado apresentado ao lado do nome."
+                ],
+                "correctIndex": 3,
+                "explanation": "Os aplicativos trazem um ícone gráfico exclusivo desenhado pelo desenvolvedor ao lado do seu nome."
+        },
+        {
+                "id": "d1_p1_q4",
+                "question": "Quando você cria um atalho para um arquivo ou programa, o que aparece no nome dele?",
+                "options": [
+                        "A palavra \"Atalho\".",
+                        "A palavra \"Cópia\".",
+                        "A extensão \".exe\".",
+                        "Um ponto de interrogação vermelho."
+                ],
+                "correctIndex": 0,
+                "explanation": "Ao gerar um atalho no Windows, o sistema inclui a palavra \"Atalho\" no nome para diferenciá-lo do arquivo original."
+        },
+        {
+                "id": "d1_p1_q5",
+                "question": "Qual das opções de exibição na área de trabalho impede que você sobreponha um ícone em cima de outro?",
+                "options": [
+                        "Ícones grandes",
+                        "Alinhar ícones à grade",
+                        "Organizar ícones automaticamente",
+                        "Mostrar ícones da área de trabalho"
+                ],
+                "correctIndex": 1,
+                "explanation": "O alinhamento à grade cria divisões invisíveis na tela que impedem que um ícone fique sobreposto a outro."
+        },
+        {
+                "id": "d1_p1_q6",
+                "question": "O que acontece quando você seleciona a opção de organizar os ícones automaticamente?",
+                "options": [
+                        "O Windows apaga arquivos antigos da lixeira.",
+                        "Todos os arquivos são movidos para a pasta Documentos.",
+                        "O computador se encarrega de organizar os ícones de forma automática.",
+                        "O plano de fundo muda para uma paisagem padrão."
+                ],
+                "correctIndex": 2,
+                "explanation": "Com essa opção ativa, o próprio sistema organiza e empilha os ícones automaticamente em colunas na tela."
+        },
+        {
+                "id": "d1_p1_q7",
+                "question": "É possível alterar o tamanho dos ícones exibidos na área de trabalho?",
+                "options": [
+                        "Não, o tamanho é fixo pelo sistema operacional.",
+                        "Sim, apenas por meio do Painel de Controle avançado.",
+                        "Sim, apertando a tecla F5 repetidamente.",
+                        "Sim, clicando com o botão direito na área de trabalho e escolhendo \"Exibir\" (ícones grandes, médios ou pequenos)."
+                ],
+                "correctIndex": 3,
+                "explanation": "No menu de contexto da área de trabalho (botão direito > Exibir), é possível escolher entre ícones grandes, médios ou pequenos."
+        },
+        {
+                "id": "d1_p1_q8",
+                "question": "Qual comando rápido do teclado ou do mouse permite copiar um arquivo arrastando-o para a área de trabalho?",
+                "options": [
+                        "Clicar com o botão direito e escolher \"Criar atalho\" ou colar o arquivo copiado.",
+                        "Apertar Ctrl + Alt + Delete.",
+                        "Dar um clique duplo no fundo da tela.",
+                        "Pressionar a tecla Esc três vezes."
+                ],
+                "correctIndex": 0,
+                "explanation": "Pode-se copiar o arquivo e colar na área de trabalho ou clicar com o botão direito e selecionar \"Criar atalho\"."
+        },
+        {
+                "id": "d1_p1_q9",
+                "question": "No procedimento alternativo para criar um atalho, qual botão da caixa de diálogo é clicado para localizar a pasta ou programa?",
+                "options": [
+                        "Salvar",
+                        "Procurar",
+                        "Avançar",
+                        "Concluir"
+                ],
+                "correctIndex": 1,
+                "explanation": "Ao clicar em \"Procurar\", abre-se a janela de navegação para selecionar o arquivo ou pasta de destino do atalho."
+        },
+        {
+                "id": "d1_p1_q10",
+                "question": "Qual é uma das vantagens citadas no vídeo sobre o alinhamento de ícones à grade?",
+                "options": [
+                        "Aumentar a velocidade de processamento do computador.",
+                        "Proteger o sistema contra vírus de pen drive.",
+                        "Deixar os ícones alinhados sem permitir sobreposição indesejada.",
+                        "Economizar espaço físico no HD."
+                ],
+                "correctIndex": 2,
+                "explanation": "O alinhamento à grade mantém a área de trabalho visualmente organizada e impede que ícones fiquem sobrepostos."
+        },
+        {
+                "id": "d1_p2_q1",
+                "question": "Por que as opções de \"Bateria\" e \"Armazenamento\" são consideradas muito importantes no Windows atual?",
+                "options": [
+                        "Porque elas impedem que o computador seja desligado à força.",
+                        "Porque substituem totalmente a necessidade de antivírus.",
+                        "Porque garantem conexão de internet de alta velocidade.",
+                        "Porque a maioria das pessoas utiliza notebooks, tornando o gerenciamento de energia e espaço essencial no dia a dia."
+                ],
+                "correctIndex": 3,
+                "explanation": "Com a predominância de notebooks, monitorar a duração da bateria e a capacidade do disco é crucial para a rotina de trabalho e estudo."
+        },
+        {
+                "id": "d1_p2_q2",
+                "question": "Qual configuração simples em \"Vídeo\" pode ajudar a economizar a bateria de um notebook?",
+                "options": [
+                        "Modificar o brilho da tela.",
+                        "Desinstalar o navegador de internet.",
+                        "Alterar o idioma do teclado para inglês.",
+                        "Limpar o histórico da lixeira."
+                ],
+                "correctIndex": 0,
+                "explanation": "A tela é um dos componentes que mais consome energia; reduzir o brilho prolonga expressivamente a duração da bateria."
+        },
+        {
+                "id": "d1_p2_q3",
+                "question": "O que acontece quando a economia de bateria é ativada automaticamente ao atingir um nível configurado (ex: 30% ou 5% por padrão)?",
+                "options": [
+                        "O computador desliga instantaneamente para proteger os dados.",
+                        "O sistema tenta economizar energia da bateria limitando atividades em segundo plano e ajustando desempenho para aumentar a vida útil.",
+                        "A tela fica completamente preta de forma irreversível.",
+                        "Todos os arquivos temporários são deletados no mesmo segundo."
+                ],
+                "correctIndex": 1,
+                "explanation": "O modo economia limita processos em segundo plano, diminui animações e reduz o consumo para estender o tempo de uso."
+        },
+        {
+                "id": "d1_p2_q4",
+                "question": "Por que o padrão de fábrica do Windows costuma vir configurado para ativar a economia de bateria em 5%?",
+                "options": [
+                        "Porque 5% é o limite máximo que a bateria suporta sem explodir.",
+                        "Porque impede o funcionamento de jogos pesados.",
+                        "Porque a maioria das pessoas costuma usar o notebook com o cabo carregador conectado por perto.",
+                        "Porque acelera a inicialização do Windows em 50%."
+                ],
+                "correctIndex": 2,
+                "explanation": "Os fabricantes pressupõem que o usuário utilize o notebook próximo à tomada, mas é recomendável ajustar para 20% ou 30%."
+        },
+        {
+                "id": "d1_p2_q5",
+                "question": "O que a tela de \"Armazenamento\" exibe em relação à unidade principal (ex: Disco C:)?",
+                "options": [
+                        "Apenas a temperatura atual do processador.",
+                        "A marca e o modelo exato da placa de vídeo.",
+                        "A quantidade de memória RAM instalada na placa-mãe.",
+                        "O tamanho total em gigabytes ou terabytes, quanto espaço já foi usado e quanto espaço está livre."
+                ],
+                "correctIndex": 3,
+                "explanation": "A tela de armazenamento apresenta graficamente o espaço total do disco, a quantidade em uso e o espaço livre restante."
+        },
+        {
+                "id": "d1_p2_q6",
+                "question": "Por que é importante monitorar o espaço livre no armazenamento do computador?",
+                "options": [
+                        "Porque quanto mais cheio o computador estiver (espaço utilizado excessivamente), mais ele poderá demorar para encontrar arquivos e executar programas.",
+                        "Porque o computador pode se autodestruir se atingir 100%.",
+                        "Porque o teclado trava permanentemente se faltar espaço.",
+                        "Para evitar que a cor da barra de tarefas mude para vermelho."
+                ],
+                "correctIndex": 0,
+                "explanation": "Discos muito cheios prejudicam o desempenho geral do sistema operacional, memória virtual e a velocidade de abertura de programas."
+        },
+        {
+                "id": "d1_p2_q7",
+                "question": "O que o Windows detalha na parte inferior da aba de armazenamento?",
+                "options": [
+                        "O consumo exato de energia elétrica em watts na tomada.",
+                        "Com o que você está gastando memória e espaço (como arquivos temporários, aplicativos, documentos, etc.).",
+                        "A lista de todas as senhas salvas no navegador.",
+                        "Os sites mais acessados nos últimos 30 dias."
+                ],
+                "correctIndex": 1,
+                "explanation": "O Windows discrimina os gigabytes ocupados por aplicativos instalados, arquivos temporários, documentos, vídeos e sistema."
+        },
+        {
+                "id": "d1_p2_q8",
+                "question": "Quais tipos de arquivos temporários comuns o Windows ajuda a remover para liberar espaço?",
+                "options": [
+                        "Fotos pessoais e vídeos salvos na pasta Documentos.",
+                        "Arquivos essenciais do sistema operacional indispensáveis para o boot.",
+                        "A lixeira, arquivos de downloads antigos e dados de atualizações do Windows Update.",
+                        "Atalhos criados na área de trabalho."
+                ],
+                "correctIndex": 2,
+                "explanation": "A ferramenta de limpeza ajuda a descartar com segurança lixo eletrônico, downloads antigos, miniaturas e restos de atualizações."
+        },
+        {
+                "id": "d1_p2_q9",
+                "question": "Qual é a vantagem de apagar arquivos temporários ou esvaziar a lixeira através dessa ferramenta?",
+                "options": [
+                        "Dobrar a capacidade física do disco rígido.",
+                        "Desinstalar vírus automaticamente.",
+                        "Atualizar o Windows para a versão mais recente da Microsoft.",
+                        "Liberar uma quantidade significativa de gigabytes (espaço de armazenamento) de forma rápida e segura."
+                ],
+                "correctIndex": 3,
+                "explanation": "Permite recuperar gigabytes de espaço em disco sem risco de deletar arquivos pessoais essenciais."
+        },
+        {
+                "id": "d1_p2_q10",
+                "question": "Com que frequência o instrutor recomenda verificar ou dar uma olhada na aba de armazenamento?",
+                "options": [
+                        "De vez em quando, especialmente conforme o tempo passa e acumulamos vídeos, aplicativos e jogos.",
+                        "Estritamente a cada 24 horas, sem exceção.",
+                        "Apenas quando o computador parar de ligar.",
+                        "Nunca, pois o Windows gerencia tudo sozinho sem precisar de atenção."
+                ],
+                "correctIndex": 0,
+                "explanation": "Revisões periódicas evitam que o disco lote silenciosamente e degrade a velocidade do computador."
+        },
+        {
+                "id": "d1_p3_q1",
+                "question": "O que significa a palavra \"Windows\" e qual é o papel desse sistema operacional?",
+                "options": [
+                        "Significa \"Portas\" e serve exclusivamente para conectar à internet.",
+                        "Significa \"Janelas\" e é o sistema operacional mais famoso e utilizado.",
+                        "Significa \"Páginas\" e é um editor de texto avançado.",
+                        "Significa \"Ferramentas\" e é um antivírus nativo."
+                ],
+                "correctIndex": 1,
+                "explanation": "Windows significa \"janelas\" em inglês, nome dado devido à sua interface gráfica revolucionária baseada em janelas."
+        },
+        {
+                "id": "d1_p3_q2",
+                "question": "O que aparece na tela do computador logo após a inicialização do Windows?",
+                "options": [
+                        "Apenas a tela preta com o prompt de comando de texto.",
+                        "Automaticamente o programa Microsoft Word aberto.",
+                        "Uma imagem de fundo, ícones e a barra de tarefas.",
+                        "Um assistente de voz para cadastro de usuário."
+                ],
+                "correctIndex": 2,
+                "explanation": "Após o boot, o usuário é recepcionado pela Área de Trabalho (Desktop), contendo papel de parede, ícones e a barra de tarefas."
+        },
+        {
+                "id": "d1_p3_q3",
+                "question": "O que são os ícones dispostos na área de trabalho?",
+                "options": [
+                        "Vídeos em alta definição reproduzidos em segundo plano.",
+                        "Erros de sistema gerados por falta de atualização.",
+                        "Links temporários da internet.",
+                        "Atalhos e representações de pastas, arquivos ou programas para acesso rápido."
+                ],
+                "correctIndex": 3,
+                "explanation": "Ícones servem como representações gráficas interativas para acionar recursos, arquivos ou programas."
+        },
+        {
+                "id": "d1_p3_q4",
+                "question": "O que acontece quando você dá dois cliques em cima de uma pasta na área de trabalho?",
+                "options": [
+                        "O Windows abre essa pasta para você visualizar seu conteúdo.",
+                        "A pasta é apagada permanentemente.",
+                        "O computador reinicia automaticamente.",
+                        "O arquivo é enviado por e-mail."
+                ],
+                "correctIndex": 0,
+                "explanation": "O duplo clique abre a pasta em uma nova janela do Explorador de Arquivos para exibir os itens guardados nela."
+        },
+        {
+                "id": "d1_p3_q5",
+                "question": "O que contém no \"Menu Iniciar\" localizado na barra de tarefas?",
+                "options": [
+                        "Exclusivamente as configurações de rede Wi-Fi.",
+                        "Uma série de opções e aplicativos organizados no lado esquerdo que podem ser abertos a qualquer momento.",
+                        "O histórico de navegação da lixeira.",
+                        "Ferramentas para formatação de disco rígido."
+                ],
+                "correctIndex": 1,
+                "explanation": "O Menu Iniciar é o ponto de partida principal do Windows, reunindo a lista de todos os aplicativos instalados e configurações."
+        },
+        {
+                "id": "d1_p3_q6",
+                "question": "Qual é a utilidade da \"Barra de Pesquisa\" no Windows?",
+                "options": [
+                        "Traduzir textos do inglês para o português em tempo real.",
+                        "Fazer pesquisas diretas no dicionário Aurélio offline.",
+                        "Permitir digitar o nome de aplicativos, pastas ou arquivos para o Windows localizá-los rapidamente.",
+                        "Controlar o volume do som do computador."
+                ],
+                "correctIndex": 2,
+                "explanation": "A barra de pesquisa localiza instantaneamente programas, arquivos, pastas e configurações do sistema pelo nome."
+        },
+        {
+                "id": "d1_p3_q7",
+                "question": "Qual é a diferença visual básica entre um atalho e um programa aberto na barra de tarefas?",
+                "options": [
+                        "Os atalhos mudam de cor para vermelho quando abertos.",
+                        "Os programas abertos piscam na tela incansavelmente.",
+                        "Não há nenhuma diferença visual.",
+                        "Os programas abertos ficam com um indicativo visual (como uma pequena barra colorida, ex: verde ou azul) embaixo deles na barra de tarefas."
+                ],
+                "correctIndex": 3,
+                "explanation": "Programas em execução recebem uma barrinha ou realce embaixo de seu ícone na barra de tarefas, indicando que a janela está ativa."
+        },
+        {
+                "id": "d1_p3_q8",
+                "question": "Como você pode fixar um programa favorito na barra de tarefas?",
+                "options": [
+                        "Clicando com o botão direito no ícone do programa e selecionando \"Fixar na barra de tarefas\".",
+                        "Pressionando as teclas Ctrl + F na área de trabalho.",
+                        "Arrastando o ícone para dentro da lixeira.",
+                        "Desligando o computador e religando com o Shift pressionado."
+                ],
+                "correctIndex": 0,
+                "explanation": "Ao clicar com o botão direito sobre o programa no menu ou na barra, escolhe-se \"Fixar na barra de tarefas\" para deixá-lo sempre acessível."
+        },
+        {
+                "id": "d1_p3_q9",
+                "question": "O que é possível encontrar e gerenciar na \"Área de Notificação\" (canto inferior direito)?",
+                "options": [
+                        "Atalhos para criar novas pastas no disco local C:.",
+                        "Relógio, calendário, controle de volume, status da conexão de internet (Wi-Fi) e avisos do sistema.",
+                        "Opções avançadas de programação em linguagem Python.",
+                        "O instalador oficial do Pacote Office."
+                ],
+                "correctIndex": 1,
+                "explanation": "A Área de Notificação reúne ícones de status vitais: relógio, calendário, rede, áudio, bateria e alertas."
+        },
+        {
+                "id": "d1_p3_q10",
+                "question": "Nos Windows mais recentes, o que a caixa/painel de notificação exibe ao ser acionada?",
+                "options": [
+                        "A lista de todos os vírus detectados no último ano.",
+                        "O saldo da conta bancária vinculada ao Windows.",
+                        "Avisos do sistema e atalhos rápidos úteis, como modo avião e brilho ou luz noturna.",
+                        "Vídeos tutoriais em streaming."
+                ],
+                "correctIndex": 2,
+                "explanation": "A central exibe alertas recentes e atalhos de ação rápida (Wi-Fi, Bluetooth, brilho, modo noturno, etc.)."
+        },
+        {
+                "id": "d1_p4_q1",
+                "question": "Quais são os três principais mecanismos utilizados para dar comandos ao computador no Windows?",
+                "options": [
+                        "Impressora, Monitor e Scanner.",
+                        "Microfone, Caixa de som e WebCam.",
+                        "Pen Drive, CD-ROM e Cabo HDMI.",
+                        "Mouse, TouchPad e Teclado."
+                ],
+                "correctIndex": 3,
+                "explanation": "Mouse, touchpad e teclado são os periféricos de entrada universais para interagir com o computador."
+        },
+        {
+                "id": "d1_p4_q2",
+                "question": "O que acontece se você clicar apenas uma vez com o botão esquerdo do mouse em cima de um ícone?",
+                "options": [
+                        "O ícone é apenas selecionado.",
+                        "O programa abre imediatamente em tela cheia.",
+                        "O arquivo é enviado para a lixeira.",
+                        "O computador executa uma varredura de vírus."
+                ],
+                "correctIndex": 0,
+                "explanation": "Um clique único com o botão esquerdo apenas seleciona/marca o item, sem executá-lo."
+        },
+        {
+                "id": "d1_p4_q3",
+                "question": "O que acontece quando você dá dois cliques rápidos com o botão esquerdo do mouse em cima de um programa ou arquivo executável?",
+                "options": [
+                        "O arquivo é renomeado automaticamente para \"Novo\".",
+                        "O programa ou arquivo é aberto.",
+                        "O Windows abre as propriedades avançadas de segurança.",
+                        "Nada acontece até que se aperte Enter."
+                ],
+                "correctIndex": 1,
+                "explanation": "O duplo clique rápido com o botão esquerdo é o comando padrão do Windows para abrir ou executar um arquivo/programa."
+        },
+        {
+                "id": "d1_p4_q4",
+                "question": "Para que serve a ação de \"clicar uma vez com o botão esquerdo e segurar, arrastando em seguida\" na área de trabalho ou pastas?",
+                "options": [
+                        "Fechar todas as janelas abertas instantaneamente.",
+                        "Formatar o disco rígido principal.",
+                        "Criar um retângulo transparente para selecionar vários arquivos/ícones ao mesmo tempo.",
+                        "Mudar a cor de fundo do monitor."
+                ],
+                "correctIndex": 2,
+                "explanation": "Arrastar com o botão esquerdo pressionado desenha uma caixa de seleção que engloba múltiplos arquivos e pastas."
+        },
+        {
+                "id": "d1_p4_q5",
+                "question": "O que sempre é aberto ao clicar com o botão direito do mouse em cima de um ícone ou na área de trabalho?",
+                "options": [
+                        "Um documento de texto em branco.",
+                        "O navegador de internet padrão.",
+                        "O painel de ajuda técnica da Microsoft.",
+                        "Uma caixa de opções (menu de contexto) com comandos relevantes para aquele item."
+                ],
+                "correctIndex": 3,
+                "explanation": "O botão direito sempre aciona o menu de contexto, exibindo ações específicas como Copiar, Renomear, Excluir e Propriedades."
+        },
+        {
+                "id": "d1_p4_q6",
+                "question": "Por que as opções que aparecem ao clicar com o botão direito variam dependendo se você clica em uma pasta, num atalho ou num aplicativo?",
+                "options": [
+                        "Porque são objetos e itens diferentes com funcionalidades e comandos específicos para cada tipo.",
+                        "Porque o mouse apresenta defeito aleatório de clique.",
+                        "Porque o Windows altera o menu de forma puramente estética sem motivo prático.",
+                        "Porque depende da quantidade de memória RAM livre."
+                ],
+                "correctIndex": 0,
+                "explanation": "O menu é contextual: adapta suas opções de acordo com a natureza e os recursos suportados pelo elemento selecionado."
+        },
+        {
+                "id": "d1_p4_q7",
+                "question": "Quais ações comuns de gerenciamento podem ser encontradas no menu do botão direito sobre um arquivo?",
+                "options": [
+                        "Instalar driver de vídeo e atualizar a BIOS.",
+                        "Excluir, Renomear, Criar atalho e Propriedades.",
+                        "Aumentar a velocidade da CPU e fazer overclock.",
+                        "Configurar resolução 4K e taxa de atualização do monitor."
+                ],
+                "correctIndex": 1,
+                "explanation": "Essas são as ações fundamentais de manipulação de arquivos no sistema operacional."
+        },
+        {
+                "id": "d1_p4_q8",
+                "question": "Para que serve a barra de rolagem (rodinha ou scroll) do mouse na área de trabalho?",
+                "options": [
+                        "Serve exclusivamente para ajustar o volume do som do computador.",
+                        "Desliga o computador quando rolada rapidamente.",
+                        "Se mantiver a tecla Ctrl pressionada e rolar para cima ou para baixo, ela aumenta ou diminui o tamanho dos ícones.",
+                        "Altera o plano de fundo da tela de bloqueio."
+                ],
+                "correctIndex": 2,
+                "explanation": "A combinação Ctrl + scroll do mouse na Área de Trabalho faz zoom dinâmico, redimensionando os ícones instantaneamente."
+        },
+        {
+                "id": "d1_p4_q9",
+                "question": "Qual é a utilidade da barra de rolagem do mouse quando você está navegando dentro de um documento longo (como no Word) ou pasta?",
+                "options": [
+                        "Salvar o arquivo automaticamente a cada linha escrita.",
+                        "Corrigir erros ortográficos do texto.",
+                        "Mudar a orientação da página de retrato para paisagem.",
+                        "Permitir descer ou subir no documento ou na pasta de forma rápida e prática."
+                ],
+                "correctIndex": 3,
+                "explanation": "A rodinha de rolagem permite deslocar a visualização para cima ou para baixo com facilidade sem precisar arrastar a barra lateral."
+        },
+        {
+                "id": "d1_p4_q10",
+                "question": "Comparando o mouse convencional com o TouchPad, o que o instrutor comenta no vídeo?",
+                "options": [
+                        "O mouse é geralmente mais ágil de se utilizar do que o TouchPad.",
+                        "O TouchPad é totalmente proibido em sistemas operacionais Windows.",
+                        "Não existe nenhuma diferença de usabilidade entre eles.",
+                        "O TouchPad possui três botões mecânicos separados obrigatórios."
+                ],
+                "correctIndex": 0,
+                "explanation": "Embora o touchpad seja integrado e portátil, o mouse tradicional oferece maior velocidade e precisão no uso contínuo."
+        },
+        {
+                "id": "d1_p5_q1",
+                "question": "Qual é a principal função da tecla \"Caps Lock\" (ou Fixa) no teclado?",
+                "options": [
+                        "Inserir um espaço duplo entre as palavras.",
+                        "Travar a digitação para que todas as letras digitadas fiquem em maiúsculo.",
+                        "Apagar o texto inteiro da página atual.",
+                        "Abrir o menu iniciar do Windows."
+                ],
+                "correctIndex": 1,
+                "explanation": "Quando acionada, a tecla Caps Lock mantém todas as letras seguintes em maiúsculas até ser desativada."
+        },
+        {
+                "id": "d1_p5_q2",
+                "question": "Por que o instrutor não recomenda o uso prolongado da tecla Caps Lock para digitar palavras maiúsculas?",
+                "options": [
+                        "Porque ela estraga o teclado fisicamente após 10 cliques.",
+                        "Porque ela desliga o monitor automaticamente.",
+                        "Porque se precisar mudar para minúsculo depois, o Word não oferece opção simples de correção nas fontes, sendo mais prático usar o Shift ou formatação de fonte.",
+                        "Porque ela bloqueia o acesso à internet."
+                ],
+                "correctIndex": 2,
+                "explanation": "Usar o Shift para maiúsculas pontuais é mais eficiente e evita erros acidentais de formatação no texto."
+        },
+        {
+                "id": "d1_p5_q3",
+                "question": "Como funciona o comportamento da tecla \"Shift\" ao digitar?",
+                "options": [
+                        "Ela trava permanentemente o teclado em maiúsculo até ser desligada.",
+                        "Ela serve apenas para apagar caracteres para frente.",
+                        "Ela fecha o programa atual em execução.",
+                        "Mantendo o Shift pressionado enquanto digita uma letra, ela sai em maiúsculo; ao soltar, as próximas letras voltam a ser minúsculas."
+                ],
+                "correctIndex": 3,
+                "explanation": "O Shift atua como modificador temporário: maiúsculo enquanto pressionado e minúsculo logo que liberado."
+        },
+        {
+                "id": "d1_p5_q4",
+                "question": "O que o Shift faz quando é pressionado junto com uma tecla numérica (ex: Shift + 1, Shift + 2, Shift + 3)?",
+                "options": [
+                        "Habilita a escrita dos símbolos localizados na parte superior da tecla (como !, @, #).",
+                        "Multiplica o número digitado por 10.",
+                        "Insere uma quebra de página no documento.",
+                        "Apaga o número digitado imediatamente."
+                ],
+                "correctIndex": 0,
+                "explanation": "O Shift aciona a função secundária da tecla, permitindo digitar símbolos superiores como ponto de exclamação, arroba e cerquilha."
+        },
+        {
+                "id": "d1_p5_q5",
+                "question": "Para que serve comumente a tecla \"Esc\" (Escape)?",
+                "options": [
+                        "Salvar o arquivo em formato PDF na área de trabalho.",
+                        "Sair de um lugar, cancelar uma ação ou fechar uma janela/diálogo que você não quer mais trabalhar.",
+                        "Inserir uma tabela formatada no Word.",
+                        "Desconectar o computador da rede elétrica."
+                ],
+                "correctIndex": 1,
+                "explanation": "A tecla Esc é o atalho universal de cancelamento, fechando janelas modais, menus suspensos ou operações em andamento."
+        },
+        {
+                "id": "d1_p5_q6",
+                "question": "Qual é a função da tecla \"Tab\" ao ser pressionada em editores de texto como o Word?",
+                "options": [
+                        "Mudar a cor da fonte para vermelho.",
+                        "Inserir um gráfico estatístico completo.",
+                        "Inserir uma tabulação (espaçamento padrão, geralmente de 1,25 cm) para avançar o parágrafo.",
+                        "Executar a impressão imediata do documento."
+                ],
+                "correctIndex": 2,
+                "explanation": "O Tab cria o recuo de primeira linha oficial de parágrafos de forma alinhada e padronizada."
+        },
+        {
+                "id": "d1_p5_q7",
+                "question": "Qual é a diferença de ação entre a tecla \"Backspace\" e a tecla \"Delete\"?",
+                "options": [
+                        "O Backspace apaga arquivos permanentes; o Delete apenas minimiza programas.",
+                        "Não há nenhuma diferença entre ambas nos teclados modernos.",
+                        "O Backspace serve para colar textos copiados.",
+                        "O Backspace apaga o que está para trás (à esquerda do cursor); o Delete apaga o que está para frente (à direita do cursor)."
+                ],
+                "correctIndex": 3,
+                "explanation": "O Backspace apaga o caractere à esquerda do cursor, enquanto o Delete apaga o caractere situado à direita do cursor."
+        },
+        {
+                "id": "d1_p5_q8",
+                "question": "O que acontece quando você pressiona a tecla \"Ctrl\" combinada com outras letras (como Ctrl + C, Ctrl + V, Ctrl + X)?",
+                "options": [
+                        "Executa atalhos fundamentais de edição: Copiar (C), Colar (V) e Recortar (X).",
+                        "Desliga o computador em segurança.",
+                        "Abre o gerenciador de tarefas avançado do Windows.",
+                        "Formata o texto em negrito e itálico simultaneamente."
+                ],
+                "correctIndex": 0,
+                "explanation": "A tecla Ctrl (Control) combinada com letras ativa os atalhos clássicos de edição e produtividade."
+        },
+        {
+                "id": "d1_p5_q9",
+                "question": "Qual é a utilidade da tecla \"Alt Gr\" em teclados brasileiros?",
+                "options": [
+                        "Alternar entre letras maiúsculas e minúsculas permanentemente.",
+                        "Habilitar símbolos e caracteres especiais localizados no canto inferior direito das teclas (como símbolos de expoente ², ³, o símbolo de graus °, ou cifras monetárias).",
+                        "Aumentar o volume do computador.",
+                        "Fechar aplicativos travados."
+                ],
+                "correctIndex": 1,
+                "explanation": "O Alt Gr (Alternate Graphic) aciona a terceira função de uma tecla, como o símbolo de grau (º), expoentes (² e ³) ou ordinal (ª)."
+        },
+        {
+                "id": "d1_p5_q10",
+                "question": "O que ocorre se você pressionar a tecla \"Num Lock\" no teclado numérico lateral e os números não aparecerem na tela?",
+                "options": [
+                        "O teclado está queimado e precisa ser substituído.",
+                        "O Windows travou por falta de memória RAM.",
+                        "A tecla Num Lock pode estar desativada/desligada; pressioná-la habilita o uso dos números do teclado numérico lateral.",
+                        "O cursor do mouse foi bloqueado pelo sistema."
+                ],
+                "correctIndex": 2,
+                "explanation": "A tecla Num Lock liga e desliga o teclado numérico lateral; quando desligada, as teclas atuam como setas de navegação."
+        }
+      ]
   },
   {
     "day": 2,
